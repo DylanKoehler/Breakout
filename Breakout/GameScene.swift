@@ -29,9 +29,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createBackground()
         resetGame()
         makeLoseZone()
-        touchesBegan()
+        kickBall()
     }
-    func touchesBegan() {
+    func kickBall() {
         ball.physicsBody?.isDynamic = true
         ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
     }
@@ -46,6 +46,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         makeBall()
         makePaddle()
         makeBricks()
+        kickBall()
     }
     
     func createBackground() {
@@ -147,7 +148,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         score = 0
                         lives = 3
                         updateLabels()
-                        touchesBegan()
+                        kickBall()
                     }
                 }
             }
@@ -191,7 +192,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if lives > 0 {
                 score = 0
                 resetGame()
-                touchesBegan()
+                kickBall()
             }
             else {
                 gameOver(winner: false)
@@ -229,6 +230,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let x = i * 55 + xOffset
                 makeBrick(x: x , y: y, color: colors[r])
             }
+        }
+    }
+    override func update(_ currentTime: TimeInterval) {
+        if abs(ball.physicsBody!.velocity.dx) < 100 {
+            // ball has stalled in x direction, so kick it randomly horizontally
+            ball.physicsBody?.applyImpulse(CGVector(dx: Int.random(in: -3...3), dy: 0))
+        }
+        if abs(ball.physicsBody!.velocity.dy) < 100 {
+            // ball has stalled in y direct, so kick it randomly vertically
+            ball.physicsBody?.applyImpulse(CGVector(dx: 0, dy: Int.random(in: -3...3)))
         }
     }
 }
