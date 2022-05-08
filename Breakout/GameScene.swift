@@ -29,24 +29,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createBackground()
         resetGame()
         makeLoseZone()
-        kickBall()
+        makeLabels()
     }
     func kickBall() {
         ball.physicsBody?.isDynamic = true
         ball.physicsBody?.applyImpulse(CGVector(dx: Int.random(in: -5...5), dy: 5))
     }
+    
     func updateLabels() {
         scoreLabel.text = "Score: \(score)"
         livesLabel.text = "Lives: \(lives)"
     }
+    
     func resetGame() {
-        
-        // this stuff happens before each game starts
-        
         makeBall()
         makePaddle()
         makeBricks()
-        kickBall()
+        updateLabels()
     }
     
     func createBackground() {
@@ -61,7 +60,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let moveLoop = SKAction.sequence([moveDown, moveReset])
             let moveForever = SKAction.repeatForever(moveLoop)
             starsBackground.run(moveForever)
-            
         }
     }
     func makeBall() {
@@ -91,7 +89,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     func makePaddle() {
         paddle.removeFromParent()   // remove the paddle, if it exists
-        paddle = SKSpriteNode(color: .white, size: CGSize(width: frame.width/4, height: 20))
+        paddle = SKSpriteNode(color: .white, size: CGSize(width: frame.width/2, height: 20))
         paddle.position = CGPoint(x: frame.midX, y: frame.minY + 125)
         paddle.name = "paddle"
         paddle.physicsBody = SKPhysicsBody(rectangleOf: paddle.size)
@@ -172,15 +170,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // increase ball velocity by 2%
                 ball.physicsBody!.velocity.dx = ball.physicsBody!.velocity.dx * CGFloat(1.02)
                 ball.physicsBody!.velocity.dy = ball.physicsBody!.velocity.dy * CGFloat(1.02)
+                
+                paddle.size = CGSize(width: Int(frame.width)/2 - score * 5, height: 20)
+                paddle.physicsBody = SKPhysicsBody(rectangleOf: paddle.size)
+                paddle.physicsBody?.isDynamic = false
+                
                 if brick.color == .blue {
                     brick.color = .orange   // blue bricks turn orange
+                    ball.fillColor = .blue
                 }
                 else if brick.color == .orange {
                     brick.color = .green    // orange bricks turn green
+                    ball.fillColor = .orange
                 }
                 else {  // must be a green brick, which get removed
                     brick.removeFromParent()
                     removedBricks += 1
+                    ball.fillColor = .green
                     if removedBricks == bricks.count {
                         gameOver(winner: true)
                     }
